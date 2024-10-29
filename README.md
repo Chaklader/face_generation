@@ -1,7 +1,584 @@
+# Generative Adversarial Networks (GANs)
+
+Generative Adversarial Networks (GANs) are a class of machine learning systems introduced by Ian Goodfellow and his
+colleagues in 2014. They consist of two neural networks that work against each other in an adversarial process:
+
+1. Generator: Creates synthetic data (like images) by trying to fool the discriminator
+2. Discriminator: Attempts to distinguish between real and generated data
+
+The process works like this:
+
+- The generator creates fake samples
+- The discriminator evaluates both real and fake samples
+- Both networks improve through this competition - the generator gets better at creating realistic data, while the
+  discriminator gets better at detecting fakes
+
+GANs have found numerous applications:
+
+- Creating realistic images, videos, and audio
+- Data augmentation for training other AI models
+- Converting sketches to photorealistic images
+- Style transfer between images
+- Creating synthetic data for training when real data is limited
+
+Some challenges with GANs include:
+
+- Training instability
+- Mode collapse (generator produces limited varieties)
+- Difficulty measuring performance
+- Computational intensity
+
+Despite these challenges, GANs have become fundamental to many AI applications, particularly in computer vision and
+content generation. They've led to technologies like deepfakes and AI art generators.
+
+In this course, we will consider a specific type of deep learning model**:**
+
+Generative Adversarial Networks, or GANs.
+Applications of GANs include:
+
+Image generation
+Image to image translation
+"Deep fakes"
+
+In this course, we will cover the following topics:
+
+Generative Adversarial Networks
+
+1. Build a generator network
+2. Build a discriminator network
+3. Build GAN losses
+4. Train on the MNIST dataset
+
+Training a Deep Convolutional GANs
+
+1. Build a DCGAN generator and discriminator
+2. Train a DCGAN model on the CIFAR10 dataset
+3. Implement GAN evaluation metrics
+
+Image to Image Translation
+
+1. Implement CycleGAN dataloaders
+2. Implement CycleGAN generator and loss functions
+3. Train a CycleGAN
+
+Modern GANs: WGAN-GP, ProGAN and StyleGAN
+
+1. Implement the Wasserstein Loss with gradient penalties
+2. Implement a ProGAN model
+3. Implement the components of a StyleGAN model
+
+Image Generation
+Fully Visible Belief Networks – where the model generates an image one pixel at a time. This is also called an
+Autoregressive Model.
+
+Generative Adversarial Networks (GANs) – where the model generates an entire image in parallel using a differentiable
+function
+
+How to Get Realistic Images
+GANs used a combination of neural networks to accomplish the task of image generation:
+
+Generator Network – takes random input through a differentiable function to transform and reshape it to have a
+recognizable structure. The output is a realistic image.
+
+Unlike training a supervised learning model, when training a generator model, there is no classification/label to
+associate with each image. It creates additional images based on a probability distribution.
+
+Discriminator Network – is a regular neural net classifier that learns to guide the generator network by outputting the
+probability that the input is real. Fake images are 0 and real images are 1.
+The generator network is forced to produce more realistic images to "fool" the discriminator network.
+
+### Quiz Question
+
+| Network       | Description                                    | Explanation                                                                                                                                                 |
+|---------------|------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Generator     | Takes random noise as input.                   | The Generator starts with random noise (latent space) as its input. This is the first step in the GAN process.                                              |
+| Generator     | Transforms noise into a realistic image.       | The Generator's job is to convert the random noise into synthetic data (like images) that looks real. It learns to create increasingly convincing fakes.    |
+| Discriminator | Learns to classify real and fake images.       | The Discriminator is trained to distinguish between real images from the training set and fake images created by the Generator.                             |
+| Discriminator | Outputs the probability that an input is real. | The Discriminator produces a probability score (typically between 0 and 1) indicating how likely it thinks the input is a real rather than generated image. |
+
+The pairing works because:
+
+- The Generator has two connected functions: taking noise input and transforming it into realistic output
+- The Discriminator has two connected functions: learning to classify images and outputting probability scores
+- Together they form an adversarial relationship where:
+    - The Generator tries to create better fakes
+    - The Discriminator tries to get better at detecting fakes
+    - This competition drives both networks to improve
+
+These matches highlight the core mechanics of how GANs work as a two-player adversarial game.
+
+### Games and Equilibria: Part 1
+
+Adversarial
+In GANs, adversarial means that two networks, the generator and the discriminator, compete with each other for improved
+image generation.
+
+This "competition" between the networks is based on Game Theory.
+
+Game Theory – a form of applied mathematics used to model cooperation and conflict between rational agents in any
+situation
+
+### Games and Equilibria: Part 2
+
+Equilibria and GANs
+Most ML models are based on optimization and follow the general pattern of
+
+Determine model parameters
+Have a cost function of these parameters
+Minimize the cost
+GANs are different because there are two players, the generator and the discriminator, and each player has its own cost.
+The "game" is therefore defined by a value function.
+
+The generator wants to minimize the value function.
+The discriminator wants to maximize the value function.
+The saddle point is when equilibrium is reached, a point in the parameters of both players that is simultaneously a
+local minimum for each player's costs with respect to that player's parameters.
+A key learning problem for GANs is finding the equilibrium of a game involving cost functions that are:
+
+1. High dimensional
+2. Continuous
+3. Non-convex
+
+Let me break down each statement and explain whether it's true or false:
+
+1. Statement: "Training a GAN is equivalent to playing a game where both networks are competing with each other."
+
+- Answer: TRUE
+- Explanation: This is an accurate description of GANs. The generator and discriminator are indeed in a minimax
+  game/competition where the generator tries to create convincing fakes while the discriminator tries to detect them.
+  This adversarial relationship is fundamental to how GANs work. Training GAN is very challenging because of their
+  unstable nature! Thankfully, researchers came up with a lot of different techniques to make GAN training easier!
+
+2. Statement: "When training a GAN, after some time, the equilibrium is always reached."
+
+- Answer: FALSE
+- Explanation: GANs don't always reach equilibrium. They can suffer from various training issues like mode collapse,
+  vanishing gradients, or failure to converge. Reaching equilibrium is not guaranteed and is actually one of the
+  challenging aspects of training GANs.
+
+3. Statement: "Game Theory is a subfield of deep learning invented to describe GANs training."
+
+- Answer: FALSE
+- Explanation: This is incorrect. Game theory is a much older field of mathematics and economics that existed long
+  before deep learning or GANs. It wasn't invented for GANs - rather, GAN training was described using existing game
+  theory concepts.
+
+4. Statement: "The GAN equilibrium is reached when the discriminator loss reaches 0"
+
+- Answer: FALSE
+- Explanation: This is incorrect. The ideal GAN equilibrium is reached when the discriminator's output is 0.5 (
+  indicating 50% uncertainty between real and fake), not when the loss is 0. A discriminator loss of 0 would actually
+  indicate a failing GAN where the discriminator has become too powerful.
+
+Here's an explanation of GANs through game theory:
+
+# GANs as a Two-Player Game
+
+## The Players and Their Objectives
+
+1. **Generator (G)**
+
+- Role: Creates fake data from random noise
+- Goal: Minimize the value function
+- Strategy: Tries to fool the discriminator by producing increasingly realistic data
+
+2. **Discriminator (D)**
+
+- Role: Classifies data as real or fake
+- Goal: Maximize the value function
+- Strategy: Tries to correctly distinguish between real and generated data
+
+## The Game Dynamics
+
+### Value Function Mechanics
+
+- G and D are playing a minimax game
+- Think of it like a counterfeiter (G) vs detective (D) game:
+    - G tries to create better counterfeits
+    - D tries to get better at detecting counterfeits
+
+### Equilibrium Concept
+
+- Saddle point: The theoretical optimal point where:
+    - G creates such realistic data that
+    - D can only achieve 50% accuracy (like random guessing)
+
+## Training Challenges
+
+The game is complex because the value function is:
+
+1. **High dimensional**: Many parameters to optimize
+2. **Continuous**: Not discrete choices but continuous adjustments
+3. **Non-convex**: Multiple local optima exist
+
+Unlike traditional ML models that just minimize one cost function, GANs must balance two competing objectives, making
+equilibrium hard to achieve in practice.
+
+### Key Difference from Traditional ML
+
+```textmate
+Traditional ML:
+- Single cost function
+- Simple minimization
+- Clear optimization path
+
+GANs:
+- Two competing costs
+- Minimax optimization
+- Complex equilibrium search
+```
+
+This game theoretic framework helps explain both the power and the training difficulties of GANs.
+
+### Tips for Training GANs: Part 1
+
+Good Architecture
+Fully Connected Architecture can be used for simple tasks that meet the following criteria:
+
+No convolution
+No recurrence
+The generator and discriminator have a least one hidden layer
+Leaky ReLU helps to make sure that the gradient can flow through the entire architecture and is a popular choice for
+hidden layer activation functions.
+
+The Hyperbolic Tangent activation function is a popular output choice for the generator and means data should be scaled
+to the interval from -1 to +1.
+
+A Sigmoid Unit is used to enforce the constraint that the output of the discriminator is a probability.
+
+Design Choice
+One of the design choices from the DCGAN architecture is Adam, an optimization algorithm.
+
+A common error is that people forget to use a numerically stable version of cross-entropy, where the loss is computed
+using the logits.
+
+Logits – the values produced by the discriminator right before the sigmoid.
+Tips for Training
+A simple trick is to multiply the 0 or 1 labels by a number a bit less than 1. This is a GANs-specific label smoothing
+strategy similar to that used to regularize normal classifiers.
+For the generator loss, minimize cross-entropy with the labels flipped.
+
+### Tips for Training GANs: Part 2
+
+Scaling GANs
+Convolutional Neural Networks (CNN) are needed to scale GANs to work on larger images. Scaling GANs relies on an
+understanding of:
+
+Classifier Convolutional Net – starting with a tall and wide feature map and moving to very short and narrow feature
+maps
+Generator Net – starting with short and narrow feature maps and moving to a wide and tall image
+Batch Normalization – on potentially every layer except the output layer of the generator and the input layer of the
+discriminator
+
+**Question 1**: Match each activation with its corresponding property
+
+Q1 Matches:
+
+- Hyperbolic tangent → output bounded between -1 and 1
+- Leaky ReLU → helps the generator learn
+- Sigmoid → output bounded between 0 and 1
+
+Explanation:
+
+- Hyperbolic tangent (tanh) squashes inputs to range [-1,1], making it useful for outputs that need both positive and
+  negative values
+- Leaky ReLU prevents "dying ReLU" problem common in generators by allowing small negative values to pass through
+- Sigmoid squashes inputs to range [0,1], making it useful for probability outputs
+
+Let me explain these three activation functions in detail:
+
+1. **Hyperbolic Tangent (tanh)**
+
+- Mathematical form: tanh(x) = (e^x - e^(-x))/(e^x + e^(-x))
+- Properties:
+    - Output range: [-1, 1]
+    - Zero-centered: Outputs are symmetric around 0
+    - S-shaped curve (similar to sigmoid but centered at 0)
+- Use cases:
+    - Hidden layers in neural networks
+    - When outputs need to be normalized between -1 and 1
+    - Common in GANs' generator output layer
+
+2. **Leaky ReLU**
+
+- Mathematical form: f(x) = x if x > 0; αx if x ≤ 0 (where α is a small constant, typically 0.01)
+- Properties:
+    - Allows small negative values (doesn't completely zero them out)
+    - Prevents "dying ReLU" problem where neurons can get stuck
+    - Has a non-zero gradient for negative inputs
+- Benefits for Generator:
+    - Helps maintain gradient flow
+    - Prevents dead neurons
+    - Allows better learning of features in negative space
+
+3. **Sigmoid**
+
+- Mathematical form: σ(x) = 1/(1 + e^(-x))
+- Properties:
+    - Output range: [0, 1]
+    - S-shaped curve
+    - Often used for binary classification
+    - Outputs can be interpreted as probabilities
+- Use cases:
+    - Final layer in binary classification
+    - Discriminator output in GANs
+    - When output needs to be interpreted as probability
+
+Comparison:
+
+```textmate
+Function        | Output Range | Gradient Properties
+----------------|--------------|--------------------
+tanh            | [-1, 1]     | Can saturate at extremes
+Leaky ReLU      | (-∞, ∞)     | Small gradient for negative values
+Sigmoid         | [0, 1]      | Can saturate at extremes
+```
+
+**Question 2**: Which of the following statements are true? (Multiple correct choices)
+
+Answers (All true):
+
+1. "The binary cross entropy (BCE) loss can be used to train both the generator and the discriminator."
+2. "Label smoothing consists in multiplying the labels by a float smaller than 1."
+3. "When training the generator, the BCE loss is used with flipped labels (fake = 1, real = 0)"
+4. "The BCE loss is only one of the possible loss functions to train a GAN. Many other options exist."
+
+Explanation:
+
+- BCE loss is versatile and can be used for both networks in a GAN
+- Label smoothing helps prevent overconfident predictions by making target values less extreme (e.g., 0.9 instead of
+  1.0)
+- Generator training uses flipped labels to maximize the probability of discriminator being wrong
+- While BCE is common, other loss functions like Wasserstein loss or least squares loss can also be used for GANs
+
+### MNIST GAN
+
+The steps for building a GAN to generate new images can be summarized as follows:
+
+1. Create a classifier by training on dataset images
+2. Create an adversarial training using a discriminator and generator
+    - The discriminator acts as a simple classifier distinguishing between real and fake images
+    - The generator acts as an adversary with the goal of tricking the discriminator into tagging generated images as "
+      real"
+
+3. Define generator and discriminator networks with opposing goals and loss functions
 
 
+1. **Data Sources**:
+
+- Top Path: MNIST training data (real handwritten digits)
+    - Shows a grid of handwritten numbers
+    - A sample '8' is extracted as real data
+- Bottom Path: Latent sample (z)
+    - Random noise input
+    - Shown as a pixelated grid
+
+2. **Generator Network**:
+
+- Takes the latent sample (random noise) as input
+- Transforms noise into a fake digit image
+- In the example, tries to generate an '8'
+- Output looks similar to but not exactly like real MNIST digits
+
+3. **Discriminator Network**:
+
+- Receives two types of inputs:
+    - Real samples from MNIST dataset
+    - Fake samples from Generator
+- Outputs a value around 0.5 when uncertain
+- Goal: Distinguish real from fake images
+
+4. **Opposing Loss Functions**:
+
+- Generator's goal:
+    - Make fake images that fool the discriminator
+    - Wants discriminator to output 0.5 (uncertain)
+- Discriminator's goal:
+    - Correctly classify real vs fake
+    - Output 1 for real images
+    - Output 0 for fake images
+
+5. **Training Process**:
+
+- Generator improves at creating realistic digits
+- Discriminator improves at detection
+- Success is reached when discriminator outputs 0.5 (can't tell difference)
+- Both networks have opposing objectives, creating an adversarial game
+
+This creates a feedback loop where both networks continually improve until the generated images become indistinguishable
+from real MNIST digits.
+
+<br>
+
+![localImage](/images/workflow.png)
+
+<br>
+
+**Game Setup: Generator vs Discriminator**
+
+1. **Training Data (MNIST)**:
+
+- Discriminator learns from real handwritten digits (ground truth)
+- Used as reference point for what "real" data looks like
+- In image: Grid of actual MNIST digits with sample "8"
+
+2. **The Game Dynamic**:
+
+**Player 1: Generator (G)**
+
+- Strategy: Create fake digits from random noise (latent space z)
+- Objective: Fool D by generating images that look like real MNIST digits
+- Learning Process:
+    - Gets better at mimicking real digit characteristics
+    - Adapts based on how well it fools D
+    - Success = D cannot distinguish its output from real digits
+
+**Player 2: Discriminator (D)**
+
+- Strategy: Classify images as real or fake
+- Objective: Correctly identify both:
+    - Real digits from MNIST dataset
+    - Fake digits from Generator
+- Learning Process:
+    - Gets better at spotting subtle differences
+    - Updates its detection based on G's improvements
+    - Success = Accurate classification of both real and fake
+
+**The Adversarial Game**:
+
+1. G generates fake digit (from noise)
+2. D receives both real MNIST digits and G's fakes
+3. D tries to distinguish them
+4. G improves based on D's success
+5. D improves based on G's deception
+6. Equilibrium reached when D outputs 0.5 (complete uncertainty)
+
+This creates an arms race where:
+
+- As G gets better at faking, D must get better at detecting
+- As D gets better at detecting, G must get better at faking
+- Both continuously improve through competition
+
+Let me clarify how each network uses training data:
+
+**Discriminator (D)**:
+
+- ✅ Uses training data directly
+- Learns from two sources:
+    1. Real MNIST digits (training data)
+    2. Fake digits from generator
+- Needs training data to learn what "real" looks like
+- Uses this knowledge to distinguish fake from real
+
+**Generator (G)**:
+
+- ❌ Does NOT use training data directly
+- Only receives:
+    1. Random noise (latent space z) as input
+    2. Feedback from discriminator's decisions
+- Never sees actual MNIST digits
+- Learns indirectly through D's feedback
+- Improves based on how well it fools D
+
+This is a key aspect of GANs:
+
+- G learns to generate realistic data without ever seeing real data
+- G only knows if its outputs are "good" or "bad" based on D's feedback
+- D acts as a teacher for G through the adversarial process
+- Training data is only used by D to learn what "real" looks like
+
+The training data informs D's standards, which then indirectly guides G's learning through their adversarial
+relationship.
+
+**Generator (G)**:
+
+- Does use training data INDIRECTLY through the learning process
+- Not by seeing it directly, but through:
+    1. Network architecture designed for the specific type of data (e.g., images of cats)
+    2. Loss function based on discriminator's feedback
+    3. Backpropagation that updates G's parameters
+
+**Example with Cat GAN**:
+
+1. Training Process:
+    - D learns from real cat images what cats look like
+    - D provides feedback to G about how "cat-like" its outputs are
+    - G's parameters get updated to better match the distribution of real cat data
+    - The whole network is structured to generate cat-like images
+
+2. Network Design:
+    - G's architecture is specifically designed for the target domain (cats)
+    - Layer structure matches the complexity of cat images
+    - Output dimensions match cat image dimensions
+
+So you're correct:
+
+- G does need domain-specific knowledge
+- This comes from:
+    - Network architecture
+    - Training process
+    - Indirect learning through D's feedback
+- While G doesn't directly see training data, the entire system is trained on it
+
+It's more accurate to say G learns the distribution of the training data rather than directly copying it.
+
+Let me break this down into a question and answer format:
+
+**Question**: Match each component of a GAN with its function.
+
+**Answer**:
+
+1. Latent vector → Random noise vector fed through the generator
+2. Generator → Turns noise into realistic images
+3. Discriminator → Classifies real from fake images
+4. Real images → Distribution the generator is trying to replicate
+5. Binary Cross Entropy → Loss function used to evaluate the discriminator's performance
+
+GANs are made of two networks, the generator and the discriminator. The generator generates realistic images from random
+noise and tries to fool the discriminator, whose job is to separate real from fake images.
+
+**Explanation**:
+
+Each component serves a specific purpose in the GAN architecture:
+
+1. **Latent vector**
+
+- Input noise that seeds the generation process
+- Random values that get transformed into meaningful data
+
+2. **Generator**
+
+- Neural network that transforms random noise
+- Learns to create realistic images from random input
+
+3. **Discriminator**
+
+- Acts as a binary classifier
+- Learns to distinguish between real and generated images
+
+4. **Real images**
+
+- Training data that represents the target distribution
+- What the generator is trying to learn to replicate
+
+5. **Binary Cross Entropy**
+
+- Loss function that guides training
+- Measures how well discriminator distinguishes real from fake
+- Helps both networks improve through training
+
+These components work together in an adversarial process to generate realistic data.
 ––––––––––––––––––––––––––––––––––––––––––––––
+
+<br>
+
+![localImage](/images/workflow.png)
+
+<br>
+––––––––––––––––––––––––––––––––––––––––––––––
+
 ## GANs Project: Face Generation
+
 ### Getting the project files
 
 The project files are located in the Project Workspace and include the following files:
@@ -12,18 +589,23 @@ The project files are located in the Project Workspace and include the following
 * **`tests.py`**
 * **`processed-celeba-small.zip`**
 
-We highly recommend using the Project Workspace to complete your project; however, if you choose to not use the workspace, you can download the project files from the Project Workspace.
+We highly recommend using the Project Workspace to complete your project; however, if you choose to not use the
+workspace, you can download the project files from the Project Workspace.
 
 ### Instructions
 
-Open the notebook file, `dlnd_face_generation_starter.ipynb` and follow the instructions. This project is organized as follows:
+Open the notebook file, `dlnd_face_generation_starter.ipynb` and follow the instructions. This project is organized as
+follows:
 
-* **Data Pipeline**: implement a data augmentation function and a custom dataset class to load the images and transform them.
+* **Data Pipeline**: implement a data augmentation function and a custom dataset class to load the images and transform
+  them.
 * **Model Implementation**: build a custom generator and a custom discriminator to make your GAN
 * **Loss Functions and Gradient Penalty**: decide on loss functions and whether you want to use gradient penalty or not.
-* **Training Loop**: implement the training loop and decide on which strategy to use 
+* **Training Loop**: implement the training loop and decide on which strategy to use
 
-Each section requires you to make design decisions based on the experience you have gathered in this course.  Do not hesitate to come back to a section to improve your model or your data pipeline based on the results that you are getting. 
+Each section requires you to make design decisions based on the experience you have gathered in this course. Do not
+hesitate to come back to a section to improve your model or your data pipeline based on the results that you are
+getting.
 
 Building a deep learning model is an iterative process, and it's especially true for GANs! Good luck!
 
@@ -31,14 +613,15 @@ Building a deep learning model is an iterative process, and it's especially true
 
 For this project you will need to submit one file – **dlnd_face_generation.ipynb**
 
-
 The full project may be submitted in two ways:
 
 **Project completed in Project Workspace:**
 
-* Your project may be submitted directly via the Project Workspace by pressing the **`Submit`** button in the bottom right corner of the workspace. 
+* Your project may be submitted directly via the Project Workspace by pressing the **`Submit`** button in the bottom
+  right corner of the workspace.
 
 **Project completed outside of Project Workspace:**
 
-* Your project may be submitted using the Project Submission page by pressing the **`Submit Project`** button in the top right corner of the page and following those directions.
+* Your project may be submitted using the Project Submission page by pressing the **`Submit Project`** button in the top
+  right corner of the page and following those directions.
 * You will need to create a zip file of the required project file and submit the zip file.
