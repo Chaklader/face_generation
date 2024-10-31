@@ -1703,11 +1703,324 @@ Calculating the gradient penalty also includes a bit of interpolation of the rea
 1. Randomly sample a coefficient $\alpha$ of between 0 and 1
 2. Calculate the interpolation as: $\hat{x} = \alpha x + (1-\alpha)G(z)$
 
+### Progressive Growing of GANS
+
+To make training even more stable, the ProGAN model was developed and the current resolution is 16x16.
+
+How ProGAN works
+
+1. It adds a new layer to the generator and a new layer to the discriminator by fading the layers in smoothly.
+2. In the generator, the resolution of the 16x16 layer is doubled using an interpolation method such as nearest
+   neighbor. The output of the 32x32 layer is then fused with this interpolated output.
+3. In the discriminator, the output of the 32x32 layer is fused with a downsampled image.
+4. A pooling method such as average pooling is used for downsampling.
+
+<br>
+
+![localImage](/images/progan.png)
+
+<br>
+
+
+In both cases, perform a weighted sum of the learned output of the new layer with the non-parametric output of the
+previous layer.
+
+Slowly increase the weight of the output of the new layer over 10 epochs to reach a stage where there is no need to fade
+that layer anymore.
+
+Then train the network at the 32x32 resolution for another 10 epochs.
+
+Layer Fading
+For more stable training, layer fading is a way to incorporate new layers. Consider the following example:
+
+<br>
+
+![localImage](/images/layer.png)
+
+<br>
+
+1. Training a ProGAN model and the current resolution is 16x16. The toRGB layer maps the output of the last convolution
+   to an RGB image and the from RGB layer takes a RGB image as input and feeds it into the next convolution layer.
+2. To increase the resolution to 32x32 use layer fading. Add a new layer to the generator and the discriminator by
+   doubling the resolution of the 16x16 layer using an interpolation method such as nearest neighbor.
+3. In the generator, fuse the output of the 32x32 layer with the interpolated output.
+4. In the discriminator, fuse the output of the 32x32 layer with a downsampled image and use a pooling method such as
+   average pooling for downsampling.
+5. For both cases, perform a weighted sum of the learned output of the new layer with the non parametric output of the
+   previous layer. Slowly increase the weight of the output of the new layer over 10 epochs to reach a stage where a
+   fade is not needed in that layer.
+6. Train the network at the 32x32 resolution for another 10 epochs
+
+ProGAN Tricks
+
+1. Progressive Growing – Progressively train layers and increase resolution
+2. Minibatch Discrimination – Enforce fake and real batches to have similar statistics
+3. Equalized Learning Rates – Scale the weights of each layer by a different constant to make sure the layers are
+   learning at the same speed
+4. Pixelwise Normalization – Normalize each pixel of a feature map along the channel axis
+
+Pixelwise normalization
+You are familiar with batch normalization and you may be familiar with other type of normalization, as described in the
+figure below.
+
+
+
+<br>
+
+![localImage](/images/group_normalization.png)
+
+<br>
+
+
+C is the channel dimensions, N the batch dimension and H, W the spatial dimensions. For example, for a batch
+normalization layer, we calculate mean and variance over the batch and spatial dimensions, so we have a pair of (mean,
+variance) values for each channel.
+
+With pixel normalization, we normalize each pixel of the input volume as follow:
+
+y = x.pow(2.0).mean(dim=1, keepdim=True).add(alpha).sqrt()
+x = x / y
+where x is the input volume of dimensions (NCHW). We square the input volume, calculate the mean over the channel
+dimension, add a very small factor alpha and calculate the square root.
+
+Minibatch Standard Deviation
+The paper, Improved Techniques for Training GANs(opens in a new tab) [3], introduced the concept of minibatch
+discrimination, to enforce similarities between batches of real and fake images.
+
+In the ProGAN paper, the authors simplify this idea by introducing minibatch standard deviation. They create a new layer
+that adds a feature map to the input. This layer does the following:
+
+calculate the standard deviation for each feature and spatials locations
+replicate the value and concatenate it over all spatial locations
+
+```textmate
+def minibatch_stddev_layer(x, group_size=4):
+    with tf.variable_scope('MinibatchStddev'):
+        group_size = tf.minimum(group_size, tf.shape(x)[0])     # Minibatch must be divisible by (or smaller than) group_size.
+        s = x.shape # [NCHW]  Input shape.
+        y = tf.reshape(x, [group_size, -1, s[1], s[2], s[3]])   # [GMCHW] Split minibatch into M groups of size G.
+        y = tf.cast(y, tf.float32)                              # [GMCHW] Cast to FP32.
+        y -= tf.reduce_mean(y, axis=0, keepdims=True)           # [GMCHW] Subtract mean over group.
+        y = tf.reduce_mean(tf.square(y), axis=0)                # [MCHW]  Calc variance over group.
+        y = tf.sqrt(y + 1e-8)                                   # [MCHW]  Calc stddev over group.
+        y = tf.reduce_mean(y, axis=[1,2,3], keepdims=True)      # [M111]  Take average over fmaps and pixels.
+        y = tf.cast(y, x.dtype)                                 # [M111]  Cast back to original data type.
+        y = tf.tile(y, [group_size, 1, s[2], s[3]])             # [N1HW]  Replicate over group and pixels.
+        return tf.concat([x, y], axis=1)                        # [NCHW]  Append as new fmap.
+```
+
+The code above is taken from the original implementation in TensorFlow(opens in a new tab) but the PyTorch version is
+very similar.
+
+Note how the authors are calculating the standard deviation per group of 4 pixels here.
+
+This new layer is added only in the discriminator obviously and towards the end of the network.
+
+### StyleGAN: Introduction
+
+Deep learning is a somewhat recent field and many consider the 2012 AlexNet paper as the starting point of the deep
+learning revolution. The progress in creating realistic generated images is most exemplified by the StyleGAN paper in
+2019 as it was the first architecture to produce very high-quality samples.
+
+The Traditional Generator
+For a traditional generator:
+
+We input a latent vector z.
+Run it through a bunch of fully connected, convolution and normalization layers.
+Get a generated RGB image.
+The StyleGAN Generator
+For the StyleGAN generator :
+
+There is a new network, only made of fully connected layer, the mapping network, and it is taking the latent vector and
+outputs a new latent vector w.
+Add noise at multiple places in the network, always after the convolution layers.
+StyleGAN uses a new type of normalization layer, the adaptive instance normalization layer, or AdaIn.
+Next, we will dissect each one of these new components and understand how they were leveraged to create such high
+quality images.
+
+<br>
+
+![localImage](/images/style_gan.png)
+
+<br>
+
+### StyleGAN Components
+
+**StyleGAN in Simple Terms:**
+Think of StyleGAN as an AI artist that can:
+
+- Create images with specific styles (like painting portraits)
+- Control different aspects separately (like hair color, age, facial features)
+- Add realistic details (like skin texture, wrinkles)
+- Mix different styles together (like combining two faces)
+
+**StyleGAN Technical Definition:**
+A generative adversarial network architecture that:
+
+- Separates high-level attributes through style mapping
+- Uses adaptive normalization for feature manipulation
+- Implements stochastic variation for detail generation
+- Enables disentangled style control at different scales
+
+**StyleGAN Components Table:**
+
+| Component                               | Function                                                                                    | Technical Details                                                                                                  | Real-World Analogy                                                                 |
+|-----------------------------------------|---------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
+| Mapping Network                         | Fully connected layers that map latent vector z to latent vector w. Helps with entanglement | - Transforms random noise (z) into style vectors (w)<br>- Multiple FC layers<br>- Improves feature disentanglement | Like a translator converting raw ideas into specific style instructions            |
+| Noise Injection                         | Adding Gaussian noise at multiple places in the generator helps with stochastic variation   | - Adds random noise at different resolutions<br>- Controls fine detail generation<br>- Creates natural variations  | Like adding random texture details to make images more realistic (pores, wrinkles) |
+| AdaIN (Adaptive Instance Normalization) | Projects the latent vector w to styles and injects them into the generator                  | - Normalizes feature maps<br>- Applies style-based transformations<br>- Controls specific attributes               | Like an artist's tool that applies specific styles to different parts of the image |
+
+**Key Features:**
+
+1. **Progressive Generation:**
+    - Builds images from low to high resolution
+    - Maintains consistency across scales
+
+2. **Style Control:**
+    - Separate control over different features
+    - Ability to mix styles at different levels
+
+3. **Quality Improvements:**
+    - Better feature disentanglement
+    - More realistic detail generation
+    - Improved style control
+
+This architecture revolutionized GAN-based image generation by providing better control and quality in generated images.
+
+Controllable Generation
+Conditional Generation indicates that the training set must be labeled and conditioning is limited to examples from the
+training set.
+
+Conditional Generation – each image is conditioned with a label (e.g. MNIST dataset).
+For example, fake 11s can not be generated with a conditional GAN trained on the MNIST dataset because the data set only
+includes digits in the range of 0 to 9.
+
+Conditional Generative Adversarial Nets(opens in a new tab) [1] introduced the conditional GAN. An example of
+conditional implementation in PyTorch can be viewed in the PyTorch-GAN CGAN implementation on GitHub(opens in a new
+tab). Conditional GANs have an extra input from the discriminator and generator networks.
+
+For controllable generation, instead of inputting a label to condition the output, the latent vector z is modified to
+control the aspect of the output. This makes the assumption that the components of z each control a different aspect of
+the output image.
+
+Controllable Generation – does not require labels.
+The Mapping Network
+The mapping network is a new component of the StyleGAN generator. A mapping network:
+
+1. Takes the latent vector z as input
+2. Outputs a new latent vector w
+3. Helps to disentangle the latent vector z for controllable generation.
+
+<br>
+
+![localImage](/images/mapping_network.png)
+
+<br>
+
+
+The Entanglement Problem
+When modifying some components, we impact more than one feature. This is the entanglement problem.
+
+For example in trying to generate faces, features could include:
+
+1. Haircut
+2. Eye color
+3. Glasses
+4. Age
+
+<br>
+
+![localImage](/images/entanglement.png)
+
+<br>
+
+
+If the features are entangled, putting glasses on a person could also make them older.
+
+Mapping network to the rescue! By mapping the vector z to another vector w, the generator gets the capacity to
+disentangle features.
+
+Noise Injection
+Another new component of StyleGAN is the injection of noise at different locations in the generator. This noise
+injection will:
+
+Help with stochastic variation! Injecting noise in the network will help create more diverse features.
+Happen at different locations in the network and impacts the variability of the images at different levels.
+To add noise:
+
+1. A random feature map is sampled from a gaussian distribution
+2. The map is multiplied by a learned scaling factor
+3. This noise is applied to the output of the convolutional layers
+
+<br>
+
+![localImage](/images/noise_injection.png)
+
+<br>
+
+
+All Normalization Layers calculate the mean and the variance of a certain subset and normalize the input.
+
+Remember, for Batch Normalization, we:
+
+1. Calculate the mean and variance of the batch and spatial dimensions
+2. For each channel of the inputs, there are different values of means and variance
+
+Instance Normalization Layer
+The Instance Normalization Layer – only normalizes over the spatial dimensions and each input has a number of channels
+times the batch size values of means and variance.
+
+
+
+<br>
+
+![localImage](/images/norm_layer.png)
+
+<br>
+
+Adaptive Instance Normalization Layer
+The Adaptive Instance Normalization Layer (Adaln):
+
+1. Takes the latent vector, w, as input and using a fully connected layer, projects that vector into two vectors of
+   style, $y_s^y_s^$ and $y_b^y_b^$
+2. The output of the previous layer goes through an Instance Normalization Layer.
+3. Use the styles $y_s^y_s^$ and $y_b^y_b^$ to scale and bias the output of the Instance Normalization Layer.
+4. Allows one to project the latent vector w into the styles and inject the styles into the generator.
+
+Style Mixing injects a different vector w at different places in the network and provides a regularization effect. This
+prevents the network from assuming that adjacent styles are correlated.
+
+
+<br>
+
+![localImage](/images/adaptive.png)
+
+<br>
+
+Style Transfer
+In practice, Adaln layers allow for the creation of a new image (c) by taking a first image (a) and modifying it in the
+style of a second image (b). A popular example is taking the image of the Mona Lisa (a) and the style of a Picasso
+painting (b) and creating a new Mona Lisa in Picasso style image (c). This image can be seen here(opens in a new tab)
+and this process is known as style transfer.
+
+The initial process of style transfer was time consuming; however, check out the paper, Arbitrary Style Transfer in
+Real-time with Adaptive Instance Normalization(opens in a new tab), which details a use case for how Adaln layers may be
+implemented to create fast style transfers based on arbitrary styles.
+
+### When to Use Modern GAN Techniques
+
+Starting with a simpler architecture is always an easy and fast way to get started on a new problem.
+
+DCGAN is great starting point
+ProGAN or StyleGAN are practical when training on high resolution images
+Wasserstein Loss and Gradient Penalties experimentation is recommended when mode collapse or vanishing gradient are
+observed
+
 ––––––––––––––––––––––––––––––––––––––––––––––
 
 <br>
 
-![localImage](/images/modern_gan.png)
+![localImage](/images/adaptive.png)
 
 <br>
 ––––––––––––––––––––––––––––––––––––––––––––––
