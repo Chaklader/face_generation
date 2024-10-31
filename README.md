@@ -1516,11 +1516,198 @@ with models trained on real data.
 
 The difference between the real and the synthetic domain is called domain gap.
 
+# Introduction to Modern GANs
+
+In this lesson, we will cover how the GAN architectural paradigm has been rethought over the last few years. We will
+cover topics such as the:
+
+1. Wasserstein GAN architecture
+2. Gradients to improve GAN training stability
+3. Growing architectures generators and discriminators
+4. StyleGAN model
+
+<br>
+
+![localImage](/images/modern_gan.png)
+
+<br>
+
+In this lesson on Modern GANs, you will:
+
+1. Use the Wasserstein Distance as a Loss Function for Training GANs
+2. Leverage Gradient Penalties to Stabilize GAN Model Training
+3. Build a ProGAN Model
+4. Build Components of a StyleGAN Model
+
+The original GAN paper [1] already mentions some of the limitations of the BCE Loss, in the section 6 'Advantages and
+disadvantages'.
+
+The MiniMax game
+
+This is the minimax game that you should be familiar with.
+
+$E[\log(D(x))] + E[\log(1-D(G(z)))]$
+
+- We have $x$, a sample from our real distribution, $z$ the latent vector, our discriminator $D$, and our generator $G$.
+
+- The discriminator tries to maximize this expression, which means maximizing the log probability of $x$ being real and
+  maximizing the log of the inverse probability of $G(z)$ being real.
+
+- The generator tries to minimize the log of the inverse probability of $G(z)$ being real.
+
+- It is more stable for the generator to maximize the log probability of $G(z)$ being fake.
+
+Challenges of Training GANs
+The common problems with GANs are:
+
+1. Mode Collapse occurs when the generator only creates some of the modes of the real distribution.
+2. Vanishing Gradient occurs when the discriminator loss reaches zero and the generator is not learning anymore.
+
+Addressing Vanishing Gradients
+Least squares (LSGANs) can partly address the vanishing gradient problem for training deep GANs.
+
+The problem is as follows:
+
+For negative log-likelihood loss, when an input x is quite big, the gradient can get close to zero and become
+meaningless for training purposes. However, with a squared loss term, the gradient will actually increase with a larger
+x, as shown below.
+
+Least square loss is just one variant of a GAN loss. There are many more variants such as a Wasserstein GAN loss(opens
+in a new tab) [3] and others.
+
+These loss variants sometimes can help stabilize training and produce better results. As you write your own code, you're
+encouraged to hypothesize, try out different loss functions, and see which works best in your case!
+
+### Wasserstein Loss
+
+Here's the OCR text with LaTeX equations:
+
+To prevent mode collapse and vanishing gradient there is another loss function to train GANs:
+
+- The Earth Mover Distance or Wasserstein Metric also referred to as Wasserstein Loss and Wasserstein Distance
+
+The Wasserstein Loss is mathematically represented as follows:
+
+$E[C(x)] - E[C(G(z))]$
+
+Similar to the BCE Loss, note that the logs have disappeared. Indeed the Wasserstein distance gets rid of the log
+function and only considers the probabilities.
+
+With the Wasserstein distance the discriminator is called Critic.
+
+The Critic:
+
+Does not discriminate between real and fake anymore but instead measures the distance between both distributions.
+Will try to maximize this expression.
+Wants to maximize the score of the real distribution and minimize the score of the fake distribution, which is similar
+to maximizing its inverse.
+The generator will try to maximize the critic score of the fake distribution, which is similar to minimizing it with the
+flipped label.
+
+The WGAN minimax game is described by the formula above.
+
+When training the critic $C$, we want to maximize the critic score on the real images x and minimize the critic score on
+the fake images $G(z)$ which is similar to maximizing the inverse of $C(G(z))$.
+
+When training the generator $G$, we want to maximize the score of the critic for the fake images.
+
+# 1-Lipschitz continuous
+
+The 1-Lipschitz continuous is a new constraint on the discriminator or critic when using the Wasserstein distance as a
+loss function.
+
+Defined mathematically:
+
+For a function $f$, the following condition must be fulfilled: $|\frac{df(x)}{dx}| \leq 1$
+
+Note: For the rest of the class, Critic and Discriminator will be used interchangeably to designate the Discriminator
+network.
+
+**Quiz Question**: Which ones of the following are true about the BCE Loss?
+
+| Statement                                                                             | Answer | Explanation                                                                                                                                              |
+|---------------------------------------------------------------------------------------|--------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| The output of the discriminator is bounded between 0 and 1                            | TRUE   | - Uses sigmoid activation for binary classification<br>- Outputs represent probability distribution<br>- Essential for binary cross-entropy calculations |
+| Requires the discriminator to be 1-Lipschitz continuous                               | FALSE  | - This is a requirement for Wasserstein GANs (WGAN)<br>- Not needed for standard BCE loss<br>- BCE uses different constraints                            |
+| Can lead to vanishing gradients when the real and fake distributions are very similar | TRUE   | - When distributions overlap significantly<br>- Gradient information becomes too small<br>- Makes training unstable                                      |
+| Can lead to mode collapse                                                             | TRUE   | - Generator might focus on a single mode to fool discriminator<br>- Loses diversity in generated samples<br>- Common problem with BCE loss               |
+
+**Key Points**:
+
+- BCE Loss has both mathematical limitations (vanishing gradients) and training issues (mode collapse)
+- Unlike Wasserstein loss, doesn't require Lipschitz continuity
+- Output constraints are fundamental to how BCE works
+- These limitations led to development of alternative losses like Wasserstein
+
+WGAN Training Algorithm
+To train the GAN:
+
+Sample from the real data and generate some fake samples
+Then calculate the Wasserstein Distance and the gradients at line 5.
+Line 6, we perform backpropagation using RMSprop, an optimization algorithm similar to stochastic gradient descent or
+Adam
+Enforce the weights to stay within a threshold of -0.01 and 0.01
+
+# WGAN algorithm
+
+1 while GAN has not converged:
+2 # for each iteration
+3 Sample a batch of real data
+4 Sample a batch of fake data
+5 Calculate the gradient gw
+6 Backpropagation w ← w + ɑ RMSProp
+7 w ← clip(w, -c, c)
+In short, weight clipping works, but is not the best approach to enforce the Lipschitz constraint.
+
+# Gradient Penalties
+
+The WGAN-GP paper introduced the concept of gradient penalty. In this paper, the authors add a new term to the new loss
+function that will penalize high gradients and help enforce the1-Lipschitz constraint. Added to the Wasserstein Loss
+formula was the gradient penalty:
+
+$\lambda E[(||\nabla_{\hat{x}}C(\hat{x})||_2 - 1)^2]$
+
+$E[C(X)] - E[C(G(z))] + \lambda E[(||\nabla_{\hat{x}}C(\hat{x})||_2 - 1)^2]$
+
+Wasserstein Loss Gradient penalty
+
+$\lambda$: penalty coefficient
+$\hat{x}$: uniformly sampled data point between the real and fake distributions
+
+Mathematical representation of gradient penalty
+
+Calculating the gradient penalty also includes a bit of interpolation of the real and fake distribution:
+
+1. Randomly sample a coefficient $\alpha$ of between 0 and 1
+2. Calculate the interpolation as: $\hat{x} = \alpha x + (1-\alpha)G(z)$
+
+# Gradient Penalties
+
+The WGAN-GP paper introduced the concept of gradient penalty. In this paper, the authors add a new term to the new loss
+function that will penalize high gradients and help enforce the1-Lipschitz constraint. Added to the Wasserstein Loss
+formula was the gradient penalty:
+
+$\lambda E[(||\nabla_{\hat{x}}C(\hat{x})||_2 - 1)^2]$
+
+$E[C(X)] - E[C(G(z))] + \lambda E[(||\nabla_{\hat{x}}C(\hat{x})||_2 - 1)^2]$
+
+Wasserstein Loss Gradient penalty
+
+$\lambda$: penalty coefficient
+$\hat{x}$: uniformly sampled data point between the real and fake distributions
+
+Mathematical representation of gradient penalty
+
+Calculating the gradient penalty also includes a bit of interpolation of the real and fake distribution:
+
+1. Randomly sample a coefficient $\alpha$ of between 0 and 1
+2. Calculate the interpolation as: $\hat{x} = \alpha x + (1-\alpha)G(z)$
+
 ––––––––––––––––––––––––––––––––––––––––––––––
 
 <br>
 
-![localImage](/images/Pix2Pix.png)
+![localImage](/images/modern_gan.png)
 
 <br>
 ––––––––––––––––––––––––––––––––––––––––––––––
