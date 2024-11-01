@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 .idea
+processed_celeba_small
+processed-celeba-small.zip
 # C extensions
 *.so
 /lectures/DCGAN_Training/data
