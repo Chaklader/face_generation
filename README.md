@@ -1,3 +1,5 @@
+# Face Generation, using DCGAN (Deep Convolutional Generative Adversarial Networks)
+
 # Generative Adversarial Networks (GANs)
 
 Generative Adversarial Networks (GANs) are a class of machine learning systems introduced by Ian Goodfellow and his
