@@ -1,6 +1,12 @@
-# Face Generation, using DCGAN (Deep Convolutional Generative Adversarial Networks)
+# Building Generative Adversarial Networks
 
-# Generative Adversarial Networks (GANs)
+<br>
+<br>
+
+# C-2: Generative Adversarial Networks
+
+<br>
+<br>
 
 Generative Adversarial Networks (GANs) are a class of machine learning systems introduced by Ian Goodfellow and his
 colleagues in 2014. They consist of two neural networks that work against each other in an adversarial process:
@@ -92,7 +98,7 @@ The generator network is forced to produce more realistic images to "fool" the d
 ### Quiz Question
 
 | Network       | Description                                    | Explanation                                                                                                                                                 |
-|---------------|------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Generator     | Takes random noise as input.                   | The Generator starts with random noise (latent space) as its input. This is the first step in the GAN process.                                              |
 | Generator     | Transforms noise into a realistic image.       | The Generator's job is to convert the random noise into synthetic data (like images) that looks real. It learns to create increasingly convincing fakes.    |
 | Discriminator | Learns to classify real and fake images.       | The Discriminator is trained to distinguish between real images from the training set and fake images created by the Generator.                             |
@@ -103,9 +109,9 @@ The pairing works because:
 - The Generator has two connected functions: taking noise input and transforming it into realistic output
 - The Discriminator has two connected functions: learning to classify images and outputting probability scores
 - Together they form an adversarial relationship where:
-    - The Generator tries to create better fakes
-    - The Discriminator tries to get better at detecting fakes
-    - This competition drives both networks to improve
+  - The Generator tries to create better fakes
+  - The Discriminator tries to get better at detecting fakes
+  - This competition drives both networks to improve
 
 These matches highlight the core mechanics of how GANs work as a two-player adversarial game.
 
@@ -196,14 +202,14 @@ Here's an explanation of GANs through game theory:
 
 - G and D are playing a minimax game
 - Think of it like a counterfeiter (G) vs detective (D) game:
-    - G tries to create better counterfeits
-    - D tries to get better at detecting counterfeits
+  - G tries to create better counterfeits
+  - D tries to get better at detecting counterfeits
 
 ### Equilibrium Concept
 
 - Saddle point: The theoretical optimal point where:
-    - G creates such realistic data that
-    - D can only achieve 50% accuracy (like random guessing)
+  - G creates such realistic data that
+  - D can only achieve 50% accuracy (like random guessing)
 
 ## Training Challenges
 
@@ -293,38 +299,38 @@ Let me explain these three activation functions in detail:
 
 - Mathematical form: tanh(x) = (e^x - e^(-x))/(e^x + e^(-x))
 - Properties:
-    - Output range: [-1, 1]
-    - Zero-centered: Outputs are symmetric around 0
-    - S-shaped curve (similar to sigmoid but centered at 0)
+  - Output range: [-1, 1]
+  - Zero-centered: Outputs are symmetric around 0
+  - S-shaped curve (similar to sigmoid but centered at 0)
 - Use cases:
-    - Hidden layers in neural networks
-    - When outputs need to be normalized between -1 and 1
-    - Common in GANs' generator output layer
+  - Hidden layers in neural networks
+  - When outputs need to be normalized between -1 and 1
+  - Common in GANs' generator output layer
 
 2. **Leaky ReLU**
 
 - Mathematical form: f(x) = x if x > 0; αx if x ≤ 0 (where α is a small constant, typically 0.01)
 - Properties:
-    - Allows small negative values (doesn't completely zero them out)
-    - Prevents "dying ReLU" problem where neurons can get stuck
-    - Has a non-zero gradient for negative inputs
+  - Allows small negative values (doesn't completely zero them out)
+  - Prevents "dying ReLU" problem where neurons can get stuck
+  - Has a non-zero gradient for negative inputs
 - Benefits for Generator:
-    - Helps maintain gradient flow
-    - Prevents dead neurons
-    - Allows better learning of features in negative space
+  - Helps maintain gradient flow
+  - Prevents dead neurons
+  - Allows better learning of features in negative space
 
 3. **Sigmoid**
 
 - Mathematical form: σ(x) = 1/(1 + e^(-x))
 - Properties:
-    - Output range: [0, 1]
-    - S-shaped curve
-    - Often used for binary classification
-    - Outputs can be interpreted as probabilities
+  - Output range: [0, 1]
+  - S-shaped curve
+  - Often used for binary classification
+  - Outputs can be interpreted as probabilities
 - Use cases:
-    - Final layer in binary classification
-    - Discriminator output in GANs
-    - When output needs to be interpreted as probability
+  - Final layer in binary classification
+  - Discriminator output in GANs
+  - When output needs to be interpreted as probability
 
 Comparison:
 
@@ -359,21 +365,21 @@ The steps for building a GAN to generate new images can be summarized as follows
 
 1. Create a classifier by training on dataset images
 2. Create an adversarial training using a discriminator and generator
-    - The discriminator acts as a simple classifier distinguishing between real and fake images
-    - The generator acts as an adversary with the goal of tricking the discriminator into tagging generated images as "
-      real"
+
+   - The discriminator acts as a simple classifier distinguishing between real and fake images
+   - The generator acts as an adversary with the goal of tricking the discriminator into tagging generated images as "
+     real"
 
 3. Define generator and discriminator networks with opposing goals and loss functions
 
-
-1. **Data Sources**:
+4. **Data Sources**:
 
 - Top Path: MNIST training data (real handwritten digits)
-    - Shows a grid of handwritten numbers
-    - A sample '8' is extracted as real data
+  - Shows a grid of handwritten numbers
+  - A sample '8' is extracted as real data
 - Bottom Path: Latent sample (z)
-    - Random noise input
-    - Shown as a pixelated grid
+  - Random noise input
+  - Shown as a pixelated grid
 
 2. **Generator Network**:
 
@@ -385,20 +391,20 @@ The steps for building a GAN to generate new images can be summarized as follows
 3. **Discriminator Network**:
 
 - Receives two types of inputs:
-    - Real samples from MNIST dataset
-    - Fake samples from Generator
+  - Real samples from MNIST dataset
+  - Fake samples from Generator
 - Outputs a value around 0.5 when uncertain
 - Goal: Distinguish real from fake images
 
 4. **Opposing Loss Functions**:
 
 - Generator's goal:
-    - Make fake images that fool the discriminator
-    - Wants discriminator to output 0.5 (uncertain)
+  - Make fake images that fool the discriminator
+  - Wants discriminator to output 0.5 (uncertain)
 - Discriminator's goal:
-    - Correctly classify real vs fake
-    - Output 1 for real images
-    - Output 0 for fake images
+  - Correctly classify real vs fake
+  - Output 1 for real images
+  - Output 0 for fake images
 
 5. **Training Process**:
 
@@ -431,20 +437,20 @@ from real MNIST digits.
 - Strategy: Create fake digits from random noise (latent space z)
 - Objective: Fool D by generating images that look like real MNIST digits
 - Learning Process:
-    - Gets better at mimicking real digit characteristics
-    - Adapts based on how well it fools D
-    - Success = D cannot distinguish its output from real digits
+  - Gets better at mimicking real digit characteristics
+  - Adapts based on how well it fools D
+  - Success = D cannot distinguish its output from real digits
 
 **Player 2: Discriminator (D)**
 
 - Strategy: Classify images as real or fake
 - Objective: Correctly identify both:
-    - Real digits from MNIST dataset
-    - Fake digits from Generator
+  - Real digits from MNIST dataset
+  - Fake digits from Generator
 - Learning Process:
-    - Gets better at spotting subtle differences
-    - Updates its detection based on G's improvements
-    - Success = Accurate classification of both real and fake
+  - Gets better at spotting subtle differences
+  - Updates its detection based on G's improvements
+  - Success = Accurate classification of both real and fake
 
 **The Adversarial Game**:
 
@@ -467,8 +473,8 @@ Let me clarify how each network uses training data:
 
 - ✅ Uses training data directly
 - Learns from two sources:
-    1. Real MNIST digits (training data)
-    2. Fake digits from generator
+  1. Real MNIST digits (training data)
+  2. Fake digits from generator
 - Needs training data to learn what "real" looks like
 - Uses this knowledge to distinguish fake from real
 
@@ -476,8 +482,8 @@ Let me clarify how each network uses training data:
 
 - ❌ Does NOT use training data directly
 - Only receives:
-    1. Random noise (latent space z) as input
-    2. Feedback from discriminator's decisions
+  1. Random noise (latent space z) as input
+  2. Feedback from discriminator's decisions
 - Never sees actual MNIST digits
 - Learns indirectly through D's feedback
 - Improves based on how well it fools D
@@ -496,30 +502,31 @@ relationship.
 
 - Does use training data INDIRECTLY through the learning process
 - Not by seeing it directly, but through:
-    1. Network architecture designed for the specific type of data (e.g., images of cats)
-    2. Loss function based on discriminator's feedback
-    3. Backpropagation that updates G's parameters
+  1. Network architecture designed for the specific type of data (e.g., images of cats)
+  2. Loss function based on discriminator's feedback
+  3. Backpropagation that updates G's parameters
 
 **Example with Cat GAN**:
 
 1. Training Process:
-    - D learns from real cat images what cats look like
-    - D provides feedback to G about how "cat-like" its outputs are
-    - G's parameters get updated to better match the distribution of real cat data
-    - The whole network is structured to generate cat-like images
+
+   - D learns from real cat images what cats look like
+   - D provides feedback to G about how "cat-like" its outputs are
+   - G's parameters get updated to better match the distribution of real cat data
+   - The whole network is structured to generate cat-like images
 
 2. Network Design:
-    - G's architecture is specifically designed for the target domain (cats)
-    - Layer structure matches the complexity of cat images
-    - Output dimensions match cat image dimensions
+   - G's architecture is specifically designed for the target domain (cats)
+   - Layer structure matches the complexity of cat images
+   - Output dimensions match cat image dimensions
 
 So you're correct:
 
 - G does need domain-specific knowledge
 - This comes from:
-    - Network architecture
-    - Training process
-    - Indirect learning through D's feedback
+  - Network architecture
+  - Training process
+  - Indirect learning through D's feedback
 - While G doesn't directly see training data, the entire system is trained on it
 
 It's more accurate to say G learns the distribution of the training data rather than directly copying it.
@@ -571,9 +578,13 @@ Each component serves a specific purpose in the GAN architecture:
 
 These components work together in an adversarial process to generate realistic data.
 
-# Training a Deep Convolutional GANs
+<br>
+<br>
 
-## Introduction to DCGANs
+# C-3: Training a Deep Convolutional GANs
+
+<br>
+<br>
 
 Welcome to this lesson on Deep Convolutional Generative Adversarial Networks, also known as, DCGANs.
 
@@ -589,7 +600,6 @@ By the end of this lesson, you will be able to:
 ![localImage](/images/DCGAN.png)
 
 <br>
-
 
 In this lesson on Deep Convolutional GANs (DCGANs) we will cover the following topics:
 
@@ -628,7 +638,6 @@ The DCGAN Discriminator is:
 ![localImage](/images/DCGAN_Discriminator.png)
 
 <br>
-
 
 Leaky ReLu – a function that will reduce any negative values by multiplying those values by some small coefficient,
 known as the negative slope.
@@ -689,23 +698,24 @@ DCGAN Generator does NOT have direct access to the training data. Here's how it 
 
 1. Never sees real training data directly
 2. Learns indirectly through:
-    - Discriminator's feedback
-    - Backpropagation of gradients
-    - Loss function signals
+   - Discriminator's feedback
+   - Backpropagation of gradients
+   - Loss function signals
 
 **How Generator Learns Patterns**:
 
 1. **Input**: Takes random noise (latent vector)
 2. **Process**:
-    - Generates fake images
-    - Gets feedback from discriminator about how "real" they look
-    - Updates its parameters based on this feedback
+
+   - Generates fake images
+   - Gets feedback from discriminator about how "real" they look
+   - Updates its parameters based on this feedback
 
 3. **Learning Chain**:
-    - Discriminator sees real training data
-    - Discriminator learns what "real" looks like
-    - Generator gets feedback from discriminator
-    - Generator improves based on this indirect feedback
+   - Discriminator sees real training data
+   - Discriminator learns what "real" looks like
+   - Generator gets feedback from discriminator
+   - Generator improves based on this indirect feedback
 
 **Key Point**:
 
@@ -787,10 +797,8 @@ For example, imagine a 3 layer network.
 
 <br>
 
-
 Instead of just thinking of it as a single network with inputs, layers, and outputs, think of the output of layer 1 as
 the input to a two layer network. This two layer network would consist of layers 2 and 3 in our original network.
-
 
 <br>
 
@@ -800,13 +808,11 @@ the input to a two layer network. This two layer network would consist of layers
 
 Likewise, the output of layer 2 can be thought of as the input to a single layer network, consisting only of layer 3.
 
-
 <br>
 
 ![localImage](/images/bn_3.png)
 
 <br>
-
 
 When you think of it like this - as a series of neural networks feeding into each other - then it's easy to imagine how
 normalizing the inputs to each layer would help. It's just like normalizing the inputs to any other neural network, but
@@ -887,7 +893,7 @@ accuracy! There are quite a few comments in that code, and I just want to recap 
 
 To add batch normalization layers to a PyTorch model:
 
-1. You add batch normalization to layers inside the__init__ function.
+1. You add batch normalization to layers inside the**init** function.
 2. Layers with batch normalization do not include a bias term. So, for linear or convolutional layers, you'll need to
    set
    bias=False if you plan to add batch normalization on the outputs.
@@ -899,7 +905,6 @@ To add batch normalization layers to a PyTorch model:
 
 Finally, when you tested your model, you set it to .eval() mode, which ensures that the batch normalization layers use
 the populationrather than the batch mean and variance (as they do during training).
-
 
 <br>
 
@@ -1009,7 +1014,6 @@ The Inception Model
 The Inception Model is a concatenation of the outputs of layers of different filter sizes that allows deeper networks.
 The Inception Score and the Frechet Inception use the Inception Model for their calculations.
 
-
 <br>
 
 ![localImage](/images/inception_model.png)
@@ -1021,7 +1025,6 @@ The KL divergence is a measure of distance between two probability distributions
 
 Low KL divergence means that the distributions are similar
 High KL divergence means that they are different
-
 
 <br>
 
@@ -1044,7 +1047,6 @@ inception score, build two probability distributions.
 ![localImage](/images/Inception.png)
 
 <br>
-
 
 The Inception Score is:
 
@@ -1100,7 +1102,6 @@ Correction: At 1:10, the description of the $m_f$ and $C_f$ should be
 Frechet Inception Distance or FID measures the distance between two multinomial Gaussian distributions, where the mean
 and covariance are calculated from the real and the generated samples.
 
-
 <br>
 
 ![localImage](/images/frechet.png)
@@ -1139,13 +1140,11 @@ sensitive to human error. Semi-supervised models give us a way to learn from a l
 and they perform surprisingly well even though the amount of labeled data you have is relatively tiny. Ian Goodfellow
 has put together a video on this top, which you can see, below.
 
-
 <br>
 
 ![localImage](/images/semi_supervised.png)
 
 <br>
-
 
 Semi-Supervised Learning in PyTorch
 There is a readable implementation of a semi-supervised GAN from the repository Improved GAN (Semi-supervised GAN)(opens
@@ -1198,7 +1197,13 @@ Adding a small amount of noise to an image of a panda causes a model to misclass
 which is a kind of ape. One of the interesting parts of this is the model's confidence. With this noise it is 99.3%
 confident that this is an image of a gibbon, when we can pretty clearly see that it is a panda!
 
-# Image to Image Translation
+<br>
+<br>
+
+# C-4: Image to Image Translation
+
+<br>
+<br>
 
 Image to Image Translation means using GANs to map from one type of image to another type, to create a new image.
 
@@ -1298,19 +1303,21 @@ Pix2Pix is a conditional GAN (cGAN) framework for image-to-image translation tas
 ### Key Components:
 
 1. **Encoder**:
-    - Downsampling blocks
-    - Each block: Conv2D → BatchNorm → LeakyReLU
-    - Progressively reduces spatial dimensions
+
+   - Downsampling blocks
+   - Each block: Conv2D → BatchNorm → LeakyReLU
+   - Progressively reduces spatial dimensions
 
 2. **Decoder**:
-    - Upsampling blocks
-    - Each block: TransposeConv2D → BatchNorm → ReLU
-    - Gradually recovers spatial dimensions
+
+   - Upsampling blocks
+   - Each block: TransposeConv2D → BatchNorm → ReLU
+   - Gradually recovers spatial dimensions
 
 3. **Skip Connections**:
-    - Connects encoder layers to decoder layers
-    - Helps preserve fine details and spatial information
-    - Combats information loss in bottleneck
+   - Connects encoder layers to decoder layers
+   - Helps preserve fine details and spatial information
+   - Combats information loss in bottleneck
 
 ## 3. Discriminator Architecture (PatchGAN)
 
@@ -1342,12 +1349,13 @@ Output: Grid of Real/Fake Predictions
 ### Generator Loss:
 
 1. **Adversarial Loss**:
-    - Fool the discriminator
-    - Make generated images look realistic
+
+   - Fool the discriminator
+   - Make generated images look realistic
 
 2. **L1 Loss**:
-    - Pixel-wise difference between generated and target
-    - Encourages output to match ground truth
+   - Pixel-wise difference between generated and target
+   - Encourages output to match ground truth
 
 Combined Loss = λ₁(Adversarial Loss) + λ₂(L1 Loss)
 
@@ -1359,9 +1367,10 @@ Combined Loss = λ₁(Adversarial Loss) + λ₂(L1 Loss)
 ## 5. Training Process
 
 1. **Input Preparation**:
-    - Paired images (source → target)
-    - Normalize to [-1, 1]
-    - Data augmentation if needed
+
+   - Paired images (source → target)
+   - Normalize to [-1, 1]
+   - Data augmentation if needed
 
 2. **Training Steps**:
 
@@ -1382,17 +1391,19 @@ For each batch:
 ## 6. Key Features & Improvements
 
 1. **Conditional Input**:
-    - Generator sees source image
-    - Discriminator sees both source and output
+
+   - Generator sees source image
+   - Discriminator sees both source and output
 
 2. **Noise Handling**:
-    - Dropout in generator provides noise
-    - Used during both training and testing
+
+   - Dropout in generator provides noise
+   - Used during both training and testing
 
 3. **Architecture Choices**:
-    - No pooling layers
-    - Instance normalization
-    - Appropriate padding for size preservation
+   - No pooling layers
+   - Instance normalization
+   - Appropriate padding for size preservation
 
 ## 7. Common Applications
 
@@ -1425,7 +1436,7 @@ encoder-decoder generator and a discriminator, we can learn the mapping from one
 **Quiz Question**: Match each component of the Pix2Pix model with its function
 
 | Component                 | Function                                                                         | Explanation                                                                                                               |
-|---------------------------|----------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
+| ------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | Pix2Pix Generator         | has an encoder - decoder architecture                                            | - Uses U-Net architecture<br>- Contains skip connections<br>- Transforms input images between domains                     |
 | Pix2Pix paired dataloader | outputs the same observation in both domains                                     | - Manages paired training data<br>- Ensures corresponding images from source/target domains<br>- Maintains data alignment |
 | Pix2Pix discriminator     | - classifies images between the two domains<br>- classifies real from fake image | - Uses PatchGAN architecture<br>- Works on image patches<br>- Provides feedback on translation realism                    |
@@ -1454,12 +1465,12 @@ elements.
 3. **Pix2Pix discriminator**:
 
 - Functions:
-    - "classifies images between the two domains"
-    - "classifies real from fake image"
+  - "classifies images between the two domains"
+  - "classifies real from fake image"
 - Explanation: PatchGAN discriminator that:
-    - Determines if image pairs are real or generated
-    - Assesses if translations between domains are realistic
-    - Works on patches rather than whole images
+  - Determines if image pairs are real or generated
+  - Assesses if translations between domains are realistic
+  - Works on patches rather than whole images
 
 Key Points:
 
@@ -1518,7 +1529,13 @@ with models trained on real data.
 
 The difference between the real and the synthetic domain is called domain gap.
 
-# Introduction to Modern GANs
+<br>
+<br>
+
+# C-5: Modern GANs
+
+<br>
+<br>
 
 In this lesson, we will cover how the GAN architectural paradigm has been rethought over the last few years. We will
 cover topics such as the:
@@ -1540,6 +1557,8 @@ In this lesson on Modern GANs, you will:
 2. Leverage Gradient Penalties to Stabilize GAN Model Training
 3. Build a ProGAN Model
 4. Build Components of a StyleGAN Model
+
+#### Limitations of the BCE Loss
 
 The original GAN paper [1] already mentions some of the limitations of the BCE Loss, in the section 6 'Advantages and
 disadvantages'.
@@ -1628,7 +1647,7 @@ network.
 **Quiz Question**: Which ones of the following are true about the BCE Loss?
 
 | Statement                                                                             | Answer | Explanation                                                                                                                                              |
-|---------------------------------------------------------------------------------------|--------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------------------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | The output of the discriminator is bounded between 0 and 1                            | TRUE   | - Uses sigmoid activation for binary classification<br>- Outputs represent probability distribution<br>- Essential for binary cross-entropy calculations |
 | Requires the discriminator to be 1-Lipschitz continuous                               | FALSE  | - This is a requirement for Wasserstein GANs (WGAN)<br>- Not needed for standard BCE loss<br>- BCE uses different constraints                            |
 | Can lead to vanishing gradients when the real and fake distributions are very similar | TRUE   | - When distributions overlap significantly<br>- Gradient information becomes too small<br>- Makes training unstable                                      |
@@ -1723,7 +1742,6 @@ How ProGAN works
 
 <br>
 
-
 In both cases, perform a weighted sum of the learned output of the new layer with the non-parametric output of the
 previous layer.
 
@@ -1765,14 +1783,11 @@ Pixelwise normalization
 You are familiar with batch normalization and you may be familiar with other type of normalization, as described in the
 figure below.
 
-
-
 <br>
 
 ![localImage](/images/group_normalization.png)
 
 <br>
-
 
 C is the channel dimensions, N the batch dimension and H, W the spatial dimensions. For example, for a batch
 normalization layer, we calculate mean and variance over the batch and spatial dimensions, so we have a pair of (mean,
@@ -1867,7 +1882,7 @@ A generative adversarial network architecture that:
 **StyleGAN Components Table:**
 
 | Component                               | Function                                                                                    | Technical Details                                                                                                  | Real-World Analogy                                                                 |
-|-----------------------------------------|---------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
+| --------------------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
 | Mapping Network                         | Fully connected layers that map latent vector z to latent vector w. Helps with entanglement | - Transforms random noise (z) into style vectors (w)<br>- Multiple FC layers<br>- Improves feature disentanglement | Like a translator converting raw ideas into specific style instructions            |
 | Noise Injection                         | Adding Gaussian noise at multiple places in the generator helps with stochastic variation   | - Adds random noise at different resolutions<br>- Controls fine detail generation<br>- Creates natural variations  | Like adding random texture details to make images more realistic (pores, wrinkles) |
 | AdaIN (Adaptive Instance Normalization) | Projects the latent vector w to styles and injects them into the generator                  | - Normalizes feature maps<br>- Applies style-based transformations<br>- Controls specific attributes               | Like an artist's tool that applies specific styles to different parts of the image |
@@ -1875,17 +1890,19 @@ A generative adversarial network architecture that:
 **Key Features:**
 
 1. **Progressive Generation:**
-    - Builds images from low to high resolution
-    - Maintains consistency across scales
+
+   - Builds images from low to high resolution
+   - Maintains consistency across scales
 
 2. **Style Control:**
-    - Separate control over different features
-    - Ability to mix styles at different levels
+
+   - Separate control over different features
+   - Ability to mix styles at different levels
 
 3. **Quality Improvements:**
-    - Better feature disentanglement
-    - More realistic detail generation
-    - Improved style control
+   - Better feature disentanglement
+   - More realistic detail generation
+   - Improved style control
 
 This architecture revolutionized GAN-based image generation by providing better control and quality in generated images.
 
@@ -1919,7 +1936,6 @@ The mapping network is a new component of the StyleGAN generator. A mapping netw
 
 <br>
 
-
 The Entanglement Problem
 When modifying some components, we impact more than one feature. This is the entanglement problem.
 
@@ -1935,7 +1951,6 @@ For example in trying to generate faces, features could include:
 ![localImage](/images/entanglement.png)
 
 <br>
-
 
 If the features are entangled, putting glasses on a person could also make them older.
 
@@ -1960,7 +1975,6 @@ To add noise:
 
 <br>
 
-
 All Normalization Layers calculate the mean and the variance of a certain subset and normalize the input.
 
 Remember, for Batch Normalization, we:
@@ -1971,8 +1985,6 @@ Remember, for Batch Normalization, we:
 Instance Normalization Layer
 The Instance Normalization Layer – only normalizes over the spatial dimensions and each input has a number of channels
 times the batch size values of means and variance.
-
-
 
 <br>
 
@@ -1991,7 +2003,6 @@ The Adaptive Instance Normalization Layer (Adaln):
 
 Style Mixing injects a different vector w at different places in the network and provides a regularization effect. This
 prevents the network from assuming that adjacent styles are correlated.
-
 
 <br>
 
@@ -2033,11 +2044,11 @@ observed
 
 The project files are located in the Project Workspace and include the following files:
 
-* **`dlnd_face_generation_starter.ipynb`**
-* **`README.md`**
-* **`requirements.txt`**
-* **`tests.py`**
-* **`processed-celeba-small.zip`**
+- **`dlnd_face_generation_starter.ipynb`**
+- **`README.md`**
+- **`requirements.txt`**
+- **`tests.py`**
+- **`processed-celeba-small.zip`**
 
 We highly recommend using the Project Workspace to complete your project; however, if you choose to not use the
 workspace, you can download the project files from the Project Workspace.
@@ -2047,11 +2058,11 @@ workspace, you can download the project files from the Project Workspace.
 Open the notebook file, `dlnd_face_generation_starter.ipynb` and follow the instructions. This project is organized as
 follows:
 
-* **Data Pipeline**: implement a data augmentation function and a custom dataset class to load the images and transform
+- **Data Pipeline**: implement a data augmentation function and a custom dataset class to load the images and transform
   them.
-* **Model Implementation**: build a custom generator and a custom discriminator to make your GAN
-* **Loss Functions and Gradient Penalty**: decide on loss functions and whether you want to use gradient penalty or not.
-* **Training Loop**: implement the training loop and decide on which strategy to use
+- **Model Implementation**: build a custom generator and a custom discriminator to make your GAN
+- **Loss Functions and Gradient Penalty**: decide on loss functions and whether you want to use gradient penalty or not.
+- **Training Loop**: implement the training loop and decide on which strategy to use
 
 Each section requires you to make design decisions based on the experience you have gathered in this course. Do not
 hesitate to come back to a section to improve your model or your data pipeline based on the results that you are
@@ -2067,11 +2078,11 @@ The full project may be submitted in two ways:
 
 **Project completed in Project Workspace:**
 
-* Your project may be submitted directly via the Project Workspace by pressing the **`Submit`** button in the bottom
+- Your project may be submitted directly via the Project Workspace by pressing the **`Submit`** button in the bottom
   right corner of the workspace.
 
 **Project completed outside of Project Workspace:**
 
-* Your project may be submitted using the Project Submission page by pressing the **`Submit Project`** button in the top
+- Your project may be submitted using the Project Submission page by pressing the **`Submit Project`** button in the top
   right corner of the page and following those directions.
-* You will need to create a zip file of the required project file and submit the zip file.
+- You will need to create a zip file of the required project file and submit the zip file.
