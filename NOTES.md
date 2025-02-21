@@ -418,7 +418,7 @@ from real MNIST digits.
 
 <br>
 
-![localImage](/images/workflow.png)
+![localImage](images/workflow.png)
 
 <br>
 
@@ -597,7 +597,7 @@ By the end of this lesson, you will be able to:
 
 <br>
 
-![localImage](/images/DCGAN.png)
+![localImage](images/DCGAN.png)
 
 <br>
 
@@ -635,7 +635,7 @@ The DCGAN Discriminator is:
 
 <br>
 
-![localImage](/images/DCGAN_Discriminator.png)
+![localImage](images/DCGAN_Discriminator.png)
 
 <br>
 
@@ -690,7 +690,7 @@ The DCGAN Generator:
 
 <br>
 
-![localImage](/images/DCGAN_Generator.png)
+![localImage](images/DCGAN_Generator.png)
 
 DCGAN Generator does NOT have direct access to the training data. Here's how it actually works:
 
@@ -793,7 +793,7 @@ For example, imagine a 3 layer network.
 
 <br>
 
-![localImage](/images/bn_1.png)
+![localImage](images/bn_1.png)
 
 <br>
 
@@ -802,7 +802,7 @@ the input to a two layer network. This two layer network would consist of layers
 
 <br>
 
-![localImage](/images/bn_2.png)
+![localImage](images/bn_2.png)
 
 <br>
 
@@ -810,7 +810,7 @@ Likewise, the output of layer 2 can be thought of as the input to a single layer
 
 <br>
 
-![localImage](/images/bn_3.png)
+![localImage](images/bn_3.png)
 
 <br>
 
@@ -908,7 +908,7 @@ the populationrather than the batch mean and variance (as they do during trainin
 
 <br>
 
-![localImage](/images/batch_normalization.png)
+![localImage](images/batch_normalization.png)
 
 <br>
 
@@ -1016,7 +1016,7 @@ The Inception Score and the Frechet Inception use the Inception Model for their 
 
 <br>
 
-![localImage](/images/inception_model.png)
+![localImage](images/inception_model.png)
 
 <br>
 
@@ -1028,7 +1028,7 @@ High KL divergence means that they are different
 
 <br>
 
-![localImage](/images/kl.png)
+![localImage](images/kl.png)
 
 <br>
 
@@ -1044,7 +1044,7 @@ inception score, build two probability distributions.
 
 <br>
 
-![localImage](/images/Inception.png)
+![localImage](images/Inception.png)
 
 <br>
 
@@ -1104,7 +1104,7 @@ and covariance are calculated from the real and the generated samples.
 
 <br>
 
-![localImage](/images/frechet.png)
+![localImage](images/frechet.png)
 
 <br>
 
@@ -1142,7 +1142,7 @@ has put together a video on this top, which you can see, below.
 
 <br>
 
-![localImage](/images/semi_supervised.png)
+![localImage](images/semi_supervised.png)
 
 <br>
 
@@ -1211,7 +1211,7 @@ This lesson will focus on a particular image-to-image translation architecture, 
 
 <br>
 
-![localImage](/images/cycle.png)
+![localImage](images/cycle.png)
 
 <br>
 
@@ -1384,7 +1384,7 @@ For each batch:
 
 <br>
 
-![localImage](/images/Pix2Pix.png)
+![localImage](images/Pix2Pix.png)
 
 <br>
 
@@ -1547,7 +1547,7 @@ cover topics such as the:
 
 <br>
 
-![localImage](/images/modern_gan.png)
+![localImage](images/modern_gan.png)
 
 <br>
 
@@ -1738,7 +1738,7 @@ How ProGAN works
 
 <br>
 
-![localImage](/images/progan.png)
+![localImage](images/progan.png)
 
 <br>
 
@@ -1755,7 +1755,7 @@ For more stable training, layer fading is a way to incorporate new layers. Consi
 
 <br>
 
-![localImage](/images/layer.png)
+![localImage](images/layer.png)
 
 <br>
 
@@ -1785,7 +1785,7 @@ figure below.
 
 <br>
 
-![localImage](/images/group_normalization.png)
+![localImage](images/group_normalization.png)
 
 <br>
 
@@ -1857,7 +1857,7 @@ quality images.
 
 <br>
 
-![localImage](/images/style_gan.png)
+![localImage](images/style_gan.png)
 
 <br>
 
@@ -1932,7 +1932,7 @@ The mapping network is a new component of the StyleGAN generator. A mapping netw
 
 <br>
 
-![localImage](/images/mapping_network.png)
+![localImage](images/mapping_network.png)
 
 <br>
 
@@ -1948,7 +1948,7 @@ For example in trying to generate faces, features could include:
 
 <br>
 
-![localImage](/images/entanglement.png)
+![localImage](images/entanglement.png)
 
 <br>
 
@@ -1971,7 +1971,7 @@ To add noise:
 
 <br>
 
-![localImage](/images/noise_injection.png)
+![localImage](images/noise_injection.png)
 
 <br>
 
@@ -1988,7 +1988,7 @@ times the batch size values of means and variance.
 
 <br>
 
-![localImage](/images/norm_layer.png)
+![localImage](images/norm_layer.png)
 
 <br>
 
@@ -2006,7 +2006,7 @@ prevents the network from assuming that adjacent styles are correlated.
 
 <br>
 
-![localImage](/images/adaptive.png)
+![localImage](images/adaptive.png)
 
 <br>
 
@@ -2033,7 +2033,7 @@ observed
 
 <br>
 
-![localImage](/images/adaptive.png)
+![localImage](images/adaptive.png)
 
 <br>
 ––––––––––––––––––––––––––––––––––––––––––––––
