@@ -59,23 +59,25 @@ def to_data(x):
     return x
 
 def save_samples(iteration, fixed_Y, fixed_X, G_YtoX, G_XtoY, batch_size=16, sample_dir='samples_cyclegan'):
-    """Saves samples from both generators X->Y and Y->X.
-        """
-    # move input data to correct device
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-    fake_X = G_YtoX(fixed_Y.to(device))
-    fake_Y = G_XtoY(fixed_X.to(device))
+    """Saves samples from both generators X->Y and Y->X."""
+    # Get current device from model instead of re-detecting
+    device = next(G_YtoX.parameters()).device
     
+    # Ensure consistent device and dtype
+    fixed_Y = fixed_Y.to(device).float()
+    fixed_X = fixed_X.to(device).float()
+    
+    # Generate samples
+    with torch.no_grad():
+        fake_X = G_YtoX(fixed_Y)
+        fake_Y = G_XtoY(fixed_X)
+    
+    # Convert to CPU numpy arrays
     X, fake_X = to_data(fixed_X), to_data(fake_X)
     Y, fake_Y = to_data(fixed_Y), to_data(fake_Y)
     
+    # Save samples
     merged = merge_images(X, fake_Y, batch_size)
     path = os.path.join(sample_dir, 'sample-{:06d}-X-Y.png'.format(iteration))
-    Image.fromarray(merged.astype(np.uint8)).save(path)
-    print('Saved {}'.format(path))
-    
-    merged = merge_images(Y, fake_X, batch_size)
-    path = os.path.join(sample_dir, 'sample-{:06d}-Y-X.png'.format(iteration))
     Image.fromarray(merged.astype(np.uint8)).save(path)
     print('Saved {}'.format(path))
