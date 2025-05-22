@@ -26,8 +26,34 @@ def check_generator(generator: torch.nn.Module, latent_dim: int):
     assert image.shape == torch.Size([1, 3, 64, 64]), 'The generator should output a 64x64x3 images.'
     print('Congrats, your generator implementation passed all the tests')
     
-def check_apply_noise(noise_layer: torch.nn.Module):
-    """Minimal test for noise injection layer that will pass with current implementation."""
+def check_apply_noise(noise_layer: torch.nn.Module) -> None:
+    """Verify basic structure of a StyleGAN noise injection layer.
+    
+    This is a minimal test that validates the layer meets structural requirements
+    without testing stochastic behavior. Used when the original implementation
+    cannot be modified.
+
+    Args:
+        noise_layer: The noise injection module to test. Expected to have:
+            - A `weights` Parameter attribute
+            - Shape-preserving forward pass
+
+    Tests:
+        1. Shape preservation: Output matches input dimensions
+        2. Parameter existence: Has learnable weights parameter
+        3. Gradient flow: Weights can receive gradients
+
+    Example:
+        >>> noise_layer = ApplyNoise(channels=512)
+        >>> check_apply_noise(noise_layer)
+        Basic noise layer structure verified
+
+    Note:
+        This is a relaxed test that won't verify:
+        - Actual noise application
+        - Stochastic behavior between calls
+        - Channel-wise scaling effects
+    """
     # Test 1: Shape preservation
     x = torch.randn(1, 512, 32, 32)
     out = noise_layer(x)
