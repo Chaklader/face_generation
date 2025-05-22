@@ -69,6 +69,8 @@ def to_data(x):
 def save_samples(iteration, fixed_Y, fixed_X, G_YtoX, G_XtoY, batch_size=16, sample_dir='samples_cyclegan'):
     """Saves samples from both generators X->Y and Y->X."""
     # Get current device from model instead of re-detecting
+    os.makedirs(sample_dir, exist_ok=True)  # This line is crucial
+
     device = next(G_YtoX.parameters()).device
     
     assert fixed_Y.dtype == torch.float32, "Input must be float32"
