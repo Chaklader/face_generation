@@ -63,9 +63,12 @@ def save_samples(iteration, fixed_Y, fixed_X, G_YtoX, G_XtoY, batch_size=16, sam
     # Get current device from model instead of re-detecting
     device = next(G_YtoX.parameters()).device
     
+    assert fixed_Y.dtype == torch.float32, "Input must be float32"
+    assert fixed_X.dtype == torch.float32, "Input must be float32"
+    
     # Ensure consistent device and dtype
-    fixed_Y = fixed_Y.to(device).float()
-    fixed_X = fixed_X.to(device).float()
+    fixed_Y = fixed_Y.to(device)
+    fixed_X = fixed_X.to(device)
     
     # Generate samples
     with torch.no_grad():
@@ -74,7 +77,7 @@ def save_samples(iteration, fixed_Y, fixed_X, G_YtoX, G_XtoY, batch_size=16, sam
     
     # Convert to CPU numpy arrays
     X, fake_X = to_data(fixed_X), to_data(fake_X)
-    Y, fake_Y = to_data(fixed_Y), to_data(fake_Y)
+    _, fake_Y = to_data(fixed_Y), to_data(fake_Y)
     
     # Save samples
     merged = merge_images(X, fake_Y, batch_size)
