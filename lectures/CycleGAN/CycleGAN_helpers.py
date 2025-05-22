@@ -91,16 +91,47 @@ def save_samples(iteration, fixed_Y, fixed_X, G_YtoX, G_XtoY, batch_size=16, sam
     fake_X = to_data(fake_X)
     fake_Y = to_data(fake_Y)
     
-    # Save both transformations as separate images
-    merged_XtoY = merge_images(X, fake_Y, batch_size)
-    merged_YtoX = merge_images(Y, fake_X, batch_size)
-    
-    # Save paths
-    path_XtoY = os.path.join(sample_dir, f'sample-{iteration:06d}-X-Y.png')
-    path_YtoX = os.path.join(sample_dir, f'sample-{iteration:06d}-Y-X.png')
-    
-    # Save images
-    Image.fromarray(merged_XtoY.astype(np.uint8)).save(path_XtoY)
-    Image.fromarray(merged_YtoX.astype(np.uint8)).save(path_YtoX)
-    
-    print(f'Saved {path_XtoY} and {path_YtoX}')
+    # Save samples
+    merged = merge_images(X, fake_Y, batch_size)
+    path_xy = os.path.join(sample_dir, 'sample-{:06d}-X-Y.png'.format(iteration))
+    Image.fromarray(merged.astype(np.uint8)).save(path_xy)
+
+    # Also save the reverse (Y->X) for easier viewing
+    merged_yx = merge_images(to_data(fixed_Y), to_data(fake_X), batch_size)
+    path_yx = os.path.join(sample_dir, 'sample-{:06d}-Y-X.png'.format(iteration))
+    Image.fromarray(merged_yx.astype(np.uint8)).save(path_yx)
+
+    print(f'Saved {path_xy} and {path_yx}')
+
+# -----------------------------------------------------------------------------
+# Utility to view saved samples without failing when one direction is missing
+# -----------------------------------------------------------------------------
+
+def view_samples(iteration, sample_dir='samples_cyclegan'):
+    """Display saved generator outputs for a given iteration.
+
+    Tries to load both the X→Y and Y→X sample grids. If one of them is
+    missing (e.g. because the helper was updated mid-training) the function
+    will still show whichever file exists instead of raising an error.
+    """
+    import matplotlib.pyplot as plt
+    import matplotlib.image as mpimg
+    import os
+
+    fig, axes = plt.subplots(1, 2, figsize=(8, 4))
+    titles = ["X to Y", "Y to X"]
+    patterns = [f'sample-{iteration:06d}-X-Y.png',
+                f'sample-{iteration:06d}-Y-X.png']
+
+    for ax, title, fname in zip(axes, titles, patterns):
+        path = os.path.join(sample_dir, fname)
+        if os.path.exists(path):
+            img = mpimg.imread(path)
+            ax.imshow(img)
+        else:
+            ax.text(0.5, 0.5, f'{fname}\nnot found', ha='center', va='center')
+        ax.set_title(title)
+        ax.axis('off')
+
+    plt.tight_layout()
+    plt.show()
