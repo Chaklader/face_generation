@@ -51,11 +51,19 @@ def merge_images(sources, targets, batch_size=16):
     
 
 def to_data(x):
-    """Converts variable to numpy."""
-    if torch.cuda.is_available():
-        x = x.cpu()
-    x = x.data.numpy()
-    x = ((x +1)*255 / (2)).astype(np.uint8) # rescale to 0-255
+    """Converts a torch Tensor to a NumPy array on CPU (works for CPU, CUDA, MPS).
+
+    The helper previously assumed CUDA-only availability which raises an
+    error on Apple Silicon (MPS) because `.data.numpy()` cannot be called
+    on tensors that live on the GPU.  We now *always* detach, move to CPU
+    and then convert to NumPy so the function is device-agnostic.
+    """
+    # Detach from graph and move to CPU no matter which accelerator is used
+    if isinstance(x, torch.Tensor):
+        x = x.detach().cpu()
+    # Convert to NumPy and rescale to 0-255
+    x = x.numpy()
+    x = ((x + 1) * 255 / 2).astype(np.uint8)
     return x
 
 def save_samples(iteration, fixed_Y, fixed_X, G_YtoX, G_XtoY, batch_size=16, sample_dir='samples_cyclegan'):
