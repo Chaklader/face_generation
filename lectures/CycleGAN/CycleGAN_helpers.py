@@ -67,30 +67,40 @@ def to_data(x):
     return x
 
 def save_samples(iteration, fixed_Y, fixed_X, G_YtoX, G_XtoY, batch_size=16, sample_dir='samples_cyclegan'):
-    """Saves samples from both generators X->Y and Y->X."""
-    # Get current device from model instead of re-detecting
-    os.makedirs(sample_dir, exist_ok=True)  # This line is crucial
-
+    """Saves samples from both generators X->Y and Y->X as separate images."""
+    os.makedirs(sample_dir, exist_ok=True)
+    
     device = next(G_YtoX.parameters()).device
     
+    # Validate input types
     assert fixed_Y.dtype == torch.float32, "Input must be float32"
     assert fixed_X.dtype == torch.float32, "Input must be float32"
     
-    # Ensure consistent device and dtype
+    # Move data to device
     fixed_Y = fixed_Y.to(device)
     fixed_X = fixed_X.to(device)
     
     # Generate samples
     with torch.no_grad():
-        fake_X = G_YtoX(fixed_Y)
-        fake_Y = G_XtoY(fixed_X)
+        fake_X = G_YtoX(fixed_Y)  # Y->X transformation
+        fake_Y = G_XtoY(fixed_X)  # X->Y transformation
     
-    # Convert to CPU numpy arrays
-    X, fake_X = to_data(fixed_X), to_data(fake_X)
-    _, fake_Y = to_data(fixed_Y), to_data(fake_Y)
+    # Convert all images to CPU numpy arrays
+    X = to_data(fixed_X)
+    Y = to_data(fixed_Y)
+    fake_X = to_data(fake_X)
+    fake_Y = to_data(fake_Y)
     
-    # Save samples
-    merged = merge_images(X, fake_Y, batch_size)
-    path = os.path.join(sample_dir, 'sample-{:06d}-X-Y.png'.format(iteration))
-    Image.fromarray(merged.astype(np.uint8)).save(path)
-    print('Saved {}'.format(path))
+    # Save both transformations as separate images
+    merged_XtoY = merge_images(X, fake_Y, batch_size)
+    merged_YtoX = merge_images(Y, fake_X, batch_size)
+    
+    # Save paths
+    path_XtoY = os.path.join(sample_dir, f'sample-{iteration:06d}-X-Y.png')
+    path_YtoX = os.path.join(sample_dir, f'sample-{iteration:06d}-Y-X.png')
+    
+    # Save images
+    Image.fromarray(merged_XtoY.astype(np.uint8)).save(path_XtoY)
+    Image.fromarray(merged_YtoX.astype(np.uint8)).save(path_YtoX)
+    
+    print(f'Saved {path_XtoY} and {path_YtoX}')
